@@ -7,12 +7,11 @@ set(SOURCES src/main.cpp)
 include_directories(
     ${CMAKE_SOURCE_DIR}/include
     ${CMAKE_SOURCE_DIR}/src
+    /opt/homebrew/opt/eigen/include/eigen3
 )
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake_modules" ${CMAKE_MODULE_PATH})
 
 add_executable(${PROJECT_NAME} ${SOURCES})
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17)
-if (UNIX)
-   target_link_libraries(${PROJECT_NAME} pthread)
-endif (UNIX)
+
