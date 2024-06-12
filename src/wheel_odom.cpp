@@ -40,3 +40,20 @@ void WheelOdom::updateManually(const double& dx, const double& dy, const double&
     theta += dtheta;
     covariance = new_covariance;
 }
+
+void WheelOdom::fuseMeasurements(const double& other_x, const double& other_y, const Eigen::Matrix3d& other_covariance) {
+    Eigen::Vector2d this_pose;
+    Eigen::Vector2d other_pose;
+    this_pose << x, y;
+    other_pose << other_x, other_y;
+    Eigen::Matrix3d this_info = covariance.inverse();
+    Eigen::Matrix3d other_info = other_covariance.inverse();
+    covariance = (this_info + other_info).inverse();
+    Eigen::Vector2d fused_pose = covariance * (this_info * this_pose + other_info + other_pose);
+    x = fused_pose.x();
+    y = fused_pose.y();
+}
+
+Eigen::Matrix3d WheelOdom::getInfoMatrix() {
+    return covariance.inverse();
+}
