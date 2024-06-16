@@ -32,7 +32,12 @@ std::pair<Eigen::Matrix2d, Eigen::Vector2d> ICP2D::computeTransformation(const E
     Eigen::Matrix2d U = svd.matrixU();
     Eigen::Matrix2d V = svd.matrixV();
 
-    Eigen::Matrix2d R = V * U.transpose();
+    Eigen::Matrix2d R = U * V.transpose();
+    if (R.determinant() < 0) {
+        std::cout << V << "\n" << U << std::endl;
+        V.col(1) *= -1;
+        R = U * V.transpose();
+    }
     Eigen::Vector2d t = Q_centroid - R * P_centroid;
 
     return {R, t};
@@ -60,7 +65,8 @@ void ICP2D::runICP(int max_iterations, double tolerance) {
         std::cout << R_new << std::endl;
         R = R_new * R;
         t = R_new * t + t_new;
-
+        std::cout << R << std::endl;
+        std::cout << "_____________" <<std::endl;
         double currentError = computeError(transformed_source, target_prime);
         if (std::abs(previousError - currentError) < tolerance) {
             break;
