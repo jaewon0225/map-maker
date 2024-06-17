@@ -34,7 +34,6 @@ std::pair<Eigen::Matrix2d, Eigen::Vector2d> ICP2D::computeTransformation(const E
 
     Eigen::Matrix2d R = U * V.transpose();
     if (R.determinant() < 0) {
-        std::cout << V << "\n" << U << std::endl;
         V.col(1) *= -1;
         R = U * V.transpose();
     }
@@ -51,11 +50,11 @@ double ICP2D::computeError(const Eigen::MatrixXd& P, const Eigen::MatrixXd& Q) {
     return error;
 }
 
-void ICP2D::runICP(int max_iterations, double tolerance) {
+std::tuple<Eigen::MatrixXd, Eigen::Matrix2d, Eigen::Vector2d> ICP2D::runICP(int max_iterations, double tolerance) {
     double previousError = std::numeric_limits<double>::max();
     Eigen::MatrixXd transformed_source = source_points;
-    R = Eigen::Matrix2d::Identity();
-    t = Eigen::Vector2d::Zero();
+    Eigen::Matrix2d R = Eigen::Matrix2d::Identity();
+    Eigen::Vector2d t = Eigen::Vector2d::Zero();
 
     for (int i = 0; i < max_iterations; ++i) {
         Eigen::MatrixXd target_prime = findCorrespondences(transformed_source, target_points);
@@ -73,7 +72,6 @@ void ICP2D::runICP(int max_iterations, double tolerance) {
         }
         previousError = currentError;
     }
-}
 
-Eigen::Matrix2d ICP2D::getRotationMatrix() const { return R; }
-Eigen::Vector2d ICP2D::getTranslationVector() const { return t; }
+    return {transformed_source, R, t};
+}
