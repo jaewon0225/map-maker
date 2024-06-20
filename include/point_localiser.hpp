@@ -16,4 +16,5 @@ private:
     Eigen::MatrixXd findCorrespondences(const Eigen::MatrixXd& source, const Eigen::MatrixXd& target);
     std::pair<Eigen::Matrix2d, Eigen::Vector2d> computeTransformation(const Eigen::MatrixXd& P, const Eigen::MatrixXd& Q);
     double computeError(const Eigen::MatrixXd& source, const Eigen::MatrixXd& target);
+    Eigen::MatrixXd extractFeatures(const Eigen::MatrixXd& source);
 };

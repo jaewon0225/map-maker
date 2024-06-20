@@ -75,3 +75,7 @@ std::tuple<Eigen::MatrixXd, Eigen::Matrix2d, Eigen::Vector2d> ICP2D::runICP(int 
 
     return {transformed_source, R, t};
 }
+
+Eigen::MatrixXd ICP2D::extractFeatures(const Eigen::MatrixXd& source) {
+    // TODO
+}
