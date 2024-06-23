@@ -1,6 +1,11 @@
 #include <cmath>
+#include <vector>
+#include <algorithm>
+
 #include "point_localiser.hpp"
 #include "plane_maker.cpp"
+#include "index_helper.hpp"
+
 
 Eigen::MatrixXd ICP2D::findCorrespondences(const Eigen::MatrixXd& source, const Eigen::MatrixXd& target) {
     Eigen::MatrixXd correspondences(2, source.cols());
@@ -76,6 +81,40 @@ std::tuple<Eigen::MatrixXd, Eigen::Matrix2d, Eigen::Vector2d> ICP2D::runICP(int 
     return {transformed_source, R, t};
 }
 
-Eigen::MatrixXd ICP2D::extractFeatures(const Eigen::MatrixXd& source) {
-    // TODO
+void ICP2D::extractFeatures(const Eigen::MatrixXd& source) {
+    int pointcloud_size = source.cols();
+    std::vector<std::pair<int, float>> region_curvatures;
+    float point_weight = -2 * num_regions;
+
+    for (size_t i  = 0; i < num_regions; ++i) {
+        // Calculate start and end point for current region
+        int start = ((pointcloud_size - 1) * i) / num_regions;
+        int end = ((region_size) * (num_regions - i - 1) + (pointcloud_size - 1) *(i + 1)) / num_regions -1;
+
+        for (size_t j = start; j <= end; ++j) {
+            float x_diff = point_weight * source.at(0,j);
+            float y_diff = point_weight * source.at(1,j);
+
+            for (int k = 1; k <= region_size; ++k) {
+                x_diff += source.at(0,j + k) + source.at(0,j - k);
+                y_diff += source.at(1,j + k) + source.at(1,j - k);
+            }
+            region_curvatures.emplace_back(j, x_diff * x_diff + y_diff * y_diff);
+        }
+        std::sort(region_curvatures.begin(), region_curvatures.end(), [](auto a, auto b) {
+            return a.second > b.second;
+        });
+        int append_count = 0;
+        for (auto& curvature : region_curvatures) {
+            if (append_count > max_edge_per_region +1 || curvature.second =< plane_threshold) {
+                break;
+            }
+            if (curvature.second > plane_threshold) {
+                edge_points.place_back(curvature.first);
+                append_count += 1;
+            }
+        }
+    }
 }
+
+// TODO: Add occlusion detection, plane downsizer

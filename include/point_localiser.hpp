@@ -12,9 +12,16 @@ public:
 private:
     Eigen::MatrixXd source_points;
     Eigen::MatrixXd target_points;
+    Eigen::MatrixXd edge_points;
+    Eigen::MatrixXd plane_points;
+    int num_regions = 5;
+    int region_size = 5; // Number of points in half region
+    int max_edge_per_region = 2;
+
+    float plane_threshold = 0.1; // Curvature value above this is considered a corner and plane if below
 
     Eigen::MatrixXd findCorrespondences(const Eigen::MatrixXd& source, const Eigen::MatrixXd& target);
     std::pair<Eigen::Matrix2d, Eigen::Vector2d> computeTransformation(const Eigen::MatrixXd& P, const Eigen::MatrixXd& Q);
     double computeError(const Eigen::MatrixXd& source, const Eigen::MatrixXd& target);
-    Eigen::MatrixXd extractFeatures(const Eigen::MatrixXd& source);
+    void extractFeatures(const Eigen::MatrixXd& source);
 };

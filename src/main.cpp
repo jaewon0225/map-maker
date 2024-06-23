@@ -1,21 +1,14 @@
-#include "point_localiser.cpp"
+#include <iostream>
 
 int main() {
-    Eigen::MatrixXd source(2, 3);
-    source << 0, 1, 0,
-              0, 0, 1;
+    int start = 0;
+    int end = 500;
+    int fr = 6;
+    int cr = 5;
 
-    Eigen::MatrixXd target(2, 3);
-    target << 0, 1, 0,
-              0, 0, 1;
-
-    ICP2D icp(source, target);
-    auto [points, R, t] = icp.runICP();
-
-    
-
-    std::cout << "Rotation Matrix:\n" << R << std::endl;
-    std::cout << "Translation Vector:\n" << t.transpose() << std::endl;
-
-    return 0;
+    for (int j = 0; j < fr; j++) {
+        int sp = ((start) * (fr -j) + (end) *j)/fr;
+        int ep = ((start + cr) * (fr -j-1) + (end) *(j+1))/fr -1;
+        std::cout << sp << ", " << ep << std::endl;
+    }
 }
