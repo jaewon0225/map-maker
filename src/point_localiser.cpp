@@ -4,7 +4,7 @@
 
 #include "point_localiser.hpp"
 #include "plane_maker.cpp"
-#include "index_helper.hpp"
+#include "helpers.hpp"
 
 
 Eigen::MatrixXd ICP2D::findCorrespondences(const Eigen::MatrixXd& source, const Eigen::MatrixXd& target) {
@@ -81,8 +81,8 @@ std::tuple<Eigen::MatrixXd, Eigen::Matrix2d, Eigen::Vector2d> ICP2D::runICP(int 
     return {transformed_source, R, t};
 }
 
-void ICP2D::extractFeatures(const Eigen::MatrixXd& source) {
-    int pointcloud_size = source.cols();
+void ICP2D::extractFeatures() {
+    int pointcloud_size = source_points.cols();
     std::vector<std::pair<int, float>> region_curvatures;
     float point_weight = -2 * num_regions;
 
@@ -92,12 +92,12 @@ void ICP2D::extractFeatures(const Eigen::MatrixXd& source) {
         int end = ((region_size) * (num_regions - i - 1) + (pointcloud_size - 1) *(i + 1)) / num_regions -1;
 
         for (size_t j = start; j <= end; ++j) {
-            float x_diff = point_weight * source.at(0,j);
-            float y_diff = point_weight * source.at(1,j);
+            float x_diff = point_weight * source_points.at(0,j);
+            float y_diff = point_weight * source_points.at(1,j);
 
             for (int k = 1; k <= region_size; ++k) {
-                x_diff += source.at(0,j + k) + source.at(0,j - k);
-                y_diff += source.at(1,j + k) + source.at(1,j - k);
+                x_diff += source_points.at(0,j + k) + source_points.at(0,j - k);
+                y_diff += source_points.at(1,j + k) + source_points.at(1,j - k);
             }
             region_curvatures.emplace_back(j, x_diff * x_diff + y_diff * y_diff);
         }
@@ -114,6 +114,13 @@ void ICP2D::extractFeatures(const Eigen::MatrixXd& source) {
                 append_count += 1;
             }
         }
+    }
+}
+
+void ICP2D::extractUnreliablePoints() {
+    picked_points.assign(source_points.cols(), 0);
+    for (size_t i = 0; i < source_points.cols(); ++i) {
+        
     }
 }
 
