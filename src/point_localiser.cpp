@@ -92,12 +92,12 @@ void ICP2D::extractFeatures() {
         int end = ((region_size) * (num_regions - i - 1) + (pointcloud_size - 1) *(i + 1)) / num_regions -1;
 
         for (size_t j = start; j <= end; ++j) {
-            float x_diff = point_weight * source_points.at(0,j);
-            float y_diff = point_weight * source_points.at(1,j);
+            float x_diff = point_weight * at(source_points, 0, j);
+            float y_diff = point_weight * at(source_points, 1, j);
 
             for (int k = 1; k <= region_size; ++k) {
-                x_diff += source_points.at(0,j + k) + source_points.at(0,j - k);
-                y_diff += source_points.at(1,j + k) + source_points.at(1,j - k);
+                x_diff += at(source_points, 0, j + k) + at(source_points, 0, j - k);
+                y_diff += at(source_points, 1, j + k) + at(source_points, 1, j - k);
             }
             region_curvatures.emplace_back(j, x_diff * x_diff + y_diff * y_diff);
         }
@@ -120,8 +120,10 @@ void ICP2D::extractFeatures() {
 void ICP2D::extractUnreliablePoints() {
     picked_points.assign(source_points.cols(), 0);
     for (size_t i = 0; i < source_points.cols(); ++i) {
-        
+        const Eigen::Vector2d prev_point = atCol(source_points, i - 1);
+        const Eigen::Vector2d point = atCol(source_points, i);
+        const Eigen::Vector2d next_point = atCol(source_points, i + 1);
     }
 }
 
-// TODO: Add occlusion detection, plane downsizer
+// TODO: Plane downsizer

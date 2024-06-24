@@ -12,7 +12,7 @@ typename Eigen::MatrixBase<Derived>::Scalar& at(Eigen::MatrixBase<Derived>& mat,
     }
 
     if (col < 0) {
-        col = += num_cols;
+        col += num_cols;
     }
 
     if (row >= num_rows) {
@@ -30,10 +30,36 @@ typename Eigen::MatrixBase<Derived>::Scalar& at(Eigen::MatrixBase<Derived>& mat,
     return mat(row, col);
 }
 
+template <typename Derived>
+Eigen::Matrix<typename Derived::Scalar, Eigen::Dynamic, 1> atCol(Eigen::MatrixBase<Derived>& mat, int col) {
+    int num_rows = mat.rows();
+    Eigen::Matrix<typename Derived::Scalar, Eigen::Dynamic, 1> column(num_rows);
+
+    for (int i = 0; i < num_rows; ++i) {
+        column(i) = at(mat, i, col);
+    }
+
+    return column;
+}
+
+template <typename Derived1, typename Derived2>
+double pointPointDistanceSquared(const Eigen::MatrixBase<Derived1>& v1, const Eigen::MatrixBase<Derived2>& v2) {
+    assert(v1.size() == v2.size() && "Inputs must have same dimension")
+    Eigen::VectorXd diff = v1 - v2;
+    return pow(diff.norm(),2);
+}
+
 template <typename Derived1, typename Derived2>
 double pointPointDistance(const Eigen::MatrixBase<Derived1>& v1, const Eigen::MatrixBase<Derived2>& v2) {
     assert(v1.size() == v2.size() && "Inputs must have same dimension")
     Eigen::VectorXd diff = v1 - v2;
+    return diff.norm(),2;
+}
+
+template <typename Derived1, typename Derived2>
+double weightedPointDistance(const Eigen::MatrixBase<Derived1>& v1, const Eigen::MatrixBase<Derived2>& v2, double weight) {
+    assert(v1.size() == v2.size() && "Inputs must have same dimension")
+    Eigen::VectorXd diff = v1 - v2 * weight;
     return diff.norm();
 }
 
@@ -41,3 +67,4 @@ template <typename Derived>
 double originPointDistance(const Eigen::MatrixBase<Derived>& v1) {
     return v1.norm();
 }
+
