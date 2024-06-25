@@ -12,8 +12,8 @@ public:
 private:
     Eigen::MatrixXd source_points;
     Eigen::MatrixXd target_points;
-    Eigen::MatrixXd edge_points;
-    Eigen::MatrixXd plane_points;
+    std::vector<int> edge_points;
+    std::vector<int> plane_points;
     std::vector<int> picked_points;
     const int num_regions = 5;
     const int region_size = 5; // Number of points in half region
@@ -23,6 +23,6 @@ private:
     Eigen::MatrixXd findCorrespondences(const Eigen::MatrixXd& source, const Eigen::MatrixXd& target);
     std::pair<Eigen::Matrix2d, Eigen::Vector2d> computeTransformation(const Eigen::MatrixXd& P, const Eigen::MatrixXd& Q);
     double computeError(const Eigen::MatrixXd& source, const Eigen::MatrixXd& target);
-    void extractFeatures(const Eigen::MatrixXd& source);
-    void extractUnreliablePoints(const Eigen::MatrixXd& source);
+    void extractFeatures();
+    void extractUnreliablePoints();
 };

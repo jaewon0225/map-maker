@@ -53,7 +53,7 @@ template <typename Derived1, typename Derived2>
 double pointPointDistance(const Eigen::MatrixBase<Derived1>& v1, const Eigen::MatrixBase<Derived2>& v2) {
     assert(v1.size() == v2.size() && "Inputs must have same dimension")
     Eigen::VectorXd diff = v1 - v2;
-    return diff.norm(),2;
+    return diff.norm();
 }
 
 template <typename Derived1, typename Derived2>

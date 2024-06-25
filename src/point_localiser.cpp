@@ -106,11 +106,11 @@ void ICP2D::extractFeatures() {
         });
         int append_count = 0;
         for (auto& curvature : region_curvatures) {
-            if (append_count > max_edge_per_region +1 || curvature.second =< plane_threshold) {
+            if (append_count > max_edge_per_region + 1 || curvature.second <= plane_threshold) {
                 break;
             }
             if (curvature.second > plane_threshold) {
-                edge_points.place_back(curvature.first);
+                edge_points.push_back(curvature.first);
                 append_count += 1;
             }
         }
@@ -118,11 +118,55 @@ void ICP2D::extractFeatures() {
 }
 
 void ICP2D::extractUnreliablePoints() {
-    picked_points.assign(source_points.cols(), 0);
-    for (size_t i = 0; i < source_points.cols(); ++i) {
+    int pointcloud_size = source_points.cols();
+    picked_points.assign(pointcloud_size, 0);
+    for (size_t i = 0; i < pointcloud_size; ++i) {
         const Eigen::Vector2d prev_point = atCol(source_points, i - 1);
         const Eigen::Vector2d point = atCol(source_points, i);
         const Eigen::Vector2d next_point = atCol(source_points, i + 1);
+
+        double next_dist = pointPointDistanceSquared(prev_point, point);
+
+        if (next_dist > 0.1) {
+            double depth1 = originPointDistance(point);
+            double depth2 = originPointDistance(next_point);
+            
+            if (depth1 > depth2) {
+                double weighted_distance = weightedPointDistance(next_point, point, depth2 / depth1) / depth2;
+                if (weighted_distance < 0.1) {
+                    if (i - region_size >= 0) {
+                        std::fill_n(&picked_points[i - region_size], region_size + 1, 1);
+                    }
+                    else {
+                        std::fill_n(&picked_points[i - region_size + pointcloud_size], region_size - i, 1);
+                        std::fill_n(&picked_points[0], i + 1, 1);
+                    }
+                    continue;
+                }
+            }
+            else {
+                double weighted_distance = weightedPointDistance(point, next_point, depth1 / depth2) / depth1;
+                if (weighted_distance < 0.1) {
+                    if (i + 1 >= pointcloud_size) {
+                        std::fill_n(&picked_points[0], region_size + 1, 1);
+                    }
+                    else if (i + 1 + region_size >= pointcloud_size) {
+                        std::fill_n(&picked_points[i + 1], i + region_size + 1 - pointcloud_size, 1);
+                        std::fill_n(&picked_points[0], pointcloud_size - i - 1, 1);
+                    }
+                    else {
+                        std::fill_n(&picked_points[i + 1], region_size + 1, 1);
+                    }
+                }
+            } 
+
+            float prev_dist = pointPointDistanceSquared(point, prev_point);
+            float dis = pow(originPointDistance(point),2);
+
+            if (next_dist > 0.0002 * dis && prev_dist > 0.0002 * dis) {
+                picked_points[i] = 1;
+            }
+        }
     }
 }
 
