@@ -65,12 +65,8 @@ std::tuple<Eigen::MatrixXd, Eigen::Matrix2d, Eigen::Vector2d> ICP2D::runICP(int 
         Eigen::MatrixXd target_prime = findCorrespondences(transformed_source, target_points);
         auto [R_new, t_new] = computeTransformation(transformed_source, target_prime);
         transformed_source = (R_new * transformed_source).colwise() + t_new;
-
-        std::cout << R_new << std::endl;
         R = R_new * R;
         t = R_new * t + t_new;
-        std::cout << R << std::endl;
-        std::cout << "_____________" <<std::endl;
         double currentError = computeError(transformed_source, target_prime);
         if (std::abs(previousError - currentError) < tolerance) {
             break;
@@ -83,6 +79,7 @@ std::tuple<Eigen::MatrixXd, Eigen::Matrix2d, Eigen::Vector2d> ICP2D::runICP(int 
 
 void ICP2D::extractFeatures() {
     int pointcloud_size = source_points.cols();
+    int global_index = 0;
     std::vector<std::pair<int, float>> region_curvatures;
     float point_weight = -2 * num_regions;
 
@@ -99,7 +96,8 @@ void ICP2D::extractFeatures() {
                 x_diff += at(source_points, 0, j + k) + at(source_points, 0, j - k);
                 y_diff += at(source_points, 1, j + k) + at(source_points, 1, j - k);
             }
-            region_curvatures.emplace_back(j, x_diff * x_diff + y_diff * y_diff);
+            region_curvatures.emplace_back(global_index, x_diff * x_diff + y_diff * y_diff);
+            global_index++;
         }
         std::sort(region_curvatures.begin(), region_curvatures.end(), [](auto a, auto b) {
             return a.second > b.second;
@@ -167,6 +165,25 @@ void ICP2D::extractUnreliablePoints() {
                 picked_points[i] = 1;
             }
         }
+    }
+}
+
+void ICP2D::markAsPicked(int index) {
+    int pointcloud_size = source_points.cols();
+    picked_points[index] = 1;
+
+    for (int i = 1; i <= region_size; ++i) {
+        if (pointPointDistanceSquared(atCol(source_points, index + i), atCol(source_points, index + i -1)) > 0.05) {
+        break;
+        }
+        picked_points[calculateIndex(pointcloud_size, index + i)] = 1;
+    }
+
+    for (int i = 1; i <= region_size; ++i) {
+        if (pointPointDistanceSquared(atCol(source_points, index - i), atCol(source_points, index - i -1)) > 0.05) {
+        break;
+        }
+        picked_points[calculateIndex(pointcloud_size, index - i)] = 1;
     }
 }
 

@@ -68,3 +68,24 @@ double originPointDistance(const Eigen::MatrixBase<Derived>& v1) {
     return v1.norm();
 }
 
+int calculateIndex(const int& size, int&& index) {
+    if (index >= size) {
+        index -= size;
+    }
+    else if (index < 0) {
+        index += size;
+    }
+
+    return index;
+}
+
+int calculateIndex(const int& size, int& index) {
+    if (index >= size) {
+        index -= size;
+    }
+    else if (index < 0) {
+        index += size;
+    }
+
+    return index;
+}

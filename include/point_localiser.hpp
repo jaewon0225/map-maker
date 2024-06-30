@@ -13,6 +13,8 @@ private:
     Eigen::MatrixXd source_points;
     Eigen::MatrixXd target_points;
     std::vector<int> edge_points;
+    std::vector<int> less_sharp_edge_points;
+    std::vector<int> less_sharp_plane_points;
     std::vector<int> plane_points;
     std::vector<int> picked_points;
     const int num_regions = 5;
@@ -25,4 +27,5 @@ private:
     double computeError(const Eigen::MatrixXd& source, const Eigen::MatrixXd& target);
     void extractFeatures();
     void extractUnreliablePoints();
+    void markAsPicked(int index);
 };
